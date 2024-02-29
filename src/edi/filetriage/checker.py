@@ -46,6 +46,9 @@ if __name__ == '__main__':
     test_file_objects = [open(test_file_path, 'rb') for test_file_path in test_file_paths]
 
     for test_file_object in test_file_objects:
-        print(test_file_object)
-        print(check_file(test_file_object))
+        try:
+            print({'file': test_file_object.name})
+            print(check_file(test_file_object))
+        except Exception as e:
+            print({'error': e})
 
