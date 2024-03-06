@@ -43,12 +43,13 @@ pip install edi.filetriage@git+https://github.com/educorvi/edi.filetriage.git
 	- `'result'`: Kurzer String, der das Ergebnis der Prüfung beschreibt (siehe results.py)  
 	- `'message'`: Lange, lesbare Beschreibung des Risikos / des Fehlers (siehe results.py)  
 
-**analyse_file_list**(*file_object_list, check_file_extension=True, prints=False, merge_results=True*)
+**analyse_file_list**(*file_object_list, check_file_extension=True, prints=False, merge_results=True, use_paths=False*)
 - Untersucht eine Liste von Dateiobjekten auf bösartigen Inhalt
 - *file_object_list*: List von Dateiobjekten (z.B. erzeugt mit open())
 - *check_file_extension*: (bool) True, falls die Dateiendung auf Gültigkeit überprüft werden sollen
 - *prints*: (bool) True, falls der Fortschritt und Meldungen in der Konsole ausgegeben werden sollen
 - *merge_results*: (bool) True, falls die Ergebnisse nach Risiko und Meldung gruppiert werden sollen
+- *use_paths*: (bool) True, falls statt File-Objekten Pfade übergeben werden sollen
 - Rückgabe: dictionary, das die Ergebnisse gruppiert nach erfolgreichen / nicht erfolgreichen Prüfungen und Risikoleveln enthält, mit folgender Form:
 ```
 {

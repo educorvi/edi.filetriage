@@ -1,6 +1,6 @@
 import magic
 
-from .file_extensions import EXTENSIONS
+from edi.filetriage.file_extensions import EXTENSIONS
 
 methods = {
     # examine_pdf

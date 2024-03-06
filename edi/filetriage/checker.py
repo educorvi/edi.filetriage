@@ -1,8 +1,8 @@
 import os
 
-from .types_helper import get_mime_type, get_method, check_extension as check_extension_helper
-from .results import get_error_result, get_msg_result
-from . import examiner
+from edi.filetriage.types_helper import get_mime_type, get_method, check_extension as check_extension_helper
+from edi.filetriage.results import get_error_result, get_msg_result
+from edi.filetriage import examiner
 
 
 def check_extension(filename, mimetype):
@@ -60,12 +60,13 @@ def analyse_file(file_object, check_file_extension=True):
     return examine_result
 
 
-def analyse_file_list(file_object_list, check_file_extension=True, prints=False, merge_results=True):
+def analyse_file_list(file_object_list, check_file_extension=True, prints=False, merge_results=True, use_paths=False):
     """Untersucht ein Liste von Dateiobjekten auf bösartigen Inhalt
     :param file_object_list: List von Dateiobjekten (z.B. erzeugt mit open())
     :param check_file_extension: (bool) True, falls die Dateiendungen auf Gültigkeit überprüft werden sollen
     :param prints: (bool) True, falls der Fortschritt und Meldungen in der Konsole ausgegeben werden sollen
     :param merge_results: (bool) True, falls die Ergebnisse nach Risiko und Meldung gruppiert werden sollen
+    :param use_paths: (bool) True, falls statt File-Objekten Pfade übergeben werden sollen
     """
 
     if merge_results:
@@ -74,6 +75,8 @@ def analyse_file_list(file_object_list, check_file_extension=True, prints=False,
         i = 0
         for file_object in file_object_list:
             i += 1
+            if use_paths:
+                file_object = open(file_object, 'rb')
             if prints: print(f'Analysiere Datei {i}: {file_object.name}')
             result = analyse_file(file_object, check_file_extension)
             if prints: print(f'Analyse von Datei {i} fertig: {result}')
@@ -116,6 +119,8 @@ def analyse_file_list(file_object_list, check_file_extension=True, prints=False,
         i = 0
         for file_object in file_object_list:
             i += 1
+            if use_paths:
+                file_object = open(file_object, 'rb')
             if prints: print(f'Analysiere Datei {i}: {file_object.name}')
             result = analyse_file(file_object, check_file_extension)
             result['path'] = file_object.name
@@ -136,9 +141,7 @@ def analyse_directory(absolute_path, recursive=True, check_file_extension=True, 
         paths = [os.path.join(root, file) for root, _, files in os.walk(absolute_path) for file in files]
     else:
         paths = [os.path.join(absolute_path, file) for file in os.listdir(absolute_path)]
-
-    objects = [open(path, 'rb') for path in paths if os.path.isfile(path)]
-    return analyse_file_list(objects, check_file_extension, prints, merge_results)
+    return analyse_file_list(paths, check_file_extension, prints, merge_results, True)
 
 
 if __name__ == '__main__':
