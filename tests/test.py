@@ -1,6 +1,6 @@
 import unittest
 import os
-from src.edi.filetriage.checker import analyse_directory
+from edi.filetriage.checker import analyse_directory
 
 
 class TestTriage(unittest.TestCase):

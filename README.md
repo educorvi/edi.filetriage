@@ -21,7 +21,7 @@ sudo apt-get install libmagic-dev
 Installation mit pip:  
   
 ```  
-pip install filetriage@git+https://github.com/educorvi/edi.filetriage.git  
+pip install edi.filetriage@git+https://github.com/educorvi/edi.filetriage.git  
 ```  
   
   
