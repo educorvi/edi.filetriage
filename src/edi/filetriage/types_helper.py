@@ -12,7 +12,7 @@ methods = {
     'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'examine_office',
     'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': 'examine_office',
     'application/vnd.openxmlformats-officedocument.presentationml.presentation': 'examine_office',
-    # examine image
+    # examine image TODO
     'image/jpeg': 'examine_image',
     'image/png': 'examine_image',
     'image/tiff': 'examine_image',

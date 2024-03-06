@@ -9,10 +9,10 @@ from results import get_error_result, get_msg_result
 #import binwalk
 
 
-def examine_pdf(file_object):
+def examine_pdf(file_object, mimetype):
     counts = get_pdf_counts(file_object)
     if counts is None:
-        return get_error_result('examine_pdf_unknown')
+        return get_error_result('examine_pdf_unknown', mimetype)
 
     pages = counts['pages']
     scripts = counts['scripts']
@@ -26,7 +26,7 @@ def examine_pdf(file_object):
         sub_counts = get_pdf_counts(sub_obj_content, object_streams=True)
         os.unlink(counts['tmp_file_name'])
         if sub_counts is None:
-            return get_error_result('examine_pdf_unknown')
+            return get_error_result('examine_pdf_unknown', mimetype)
         os.unlink(sub_counts['tmp_file_name'])
 
         pages += sub_counts['pages']
@@ -38,17 +38,17 @@ def examine_pdf(file_object):
     if scripts > 0:
         if actions > 0 or acroforms > 0 or filters > 0:
             if pages <= 1:
-                return get_msg_result('pdf_script_action_page')
+                return get_msg_result('pdf_script_action_page', mimetype)
             else:
-                return get_msg_result('pdf_script_action')
+                return get_msg_result('pdf_script_action', mimetype)
         else:
-            return get_msg_result('pdf_script')
+            return get_msg_result('pdf_script', mimetype)
     elif actions > 0:
-        return get_msg_result('pdf_action')
+        return get_msg_result('pdf_action', mimetype)
     elif pages < 1:
-        return get_msg_result('pdf_no_pages')
+        return get_msg_result('pdf_no_pages', mimetype)
     else:
-        return get_msg_result('risk_none')
+        return get_msg_result('risk_none', mimetype)
 
 
 def get_pdf_counts(file_object, object_streams=False):
@@ -97,7 +97,7 @@ def get_pdf_counts(file_object, object_streams=False):
             'tmp_file_name': tmp_file.name}
 
 
-def examine_office(file_object):
+def examine_office(file_object, mimetype):
     tmp_file = tempfile.NamedTemporaryFile(delete=False)
     tmp_file.write(file_object.read())
     tmp_file.close()
@@ -111,12 +111,12 @@ def examine_office(file_object):
     if jsonresults:
         for i in jsonresults['items']:
             if 'VBA' in i['name']:
-                return get_msg_result('office_vba')
-    return get_msg_result('risk_none')
+                return get_msg_result('office_vba', mimetype)
+    return get_msg_result('risk_none', mimetype)
 
 
 """
-def examine_image(file_object):
+def examine_image(file_object, mimetype):
     tmp_file = tempfile.NamedTemporaryFile(delete=False)
     tmp_file.write(file_object.read())
     tmp_file.close()
