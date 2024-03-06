@@ -1,8 +1,8 @@
 import os
 
-from types_helper import get_mime_type, get_method, check_extension as check_extension_helper
-from results import get_error_result, get_msg_result
-import examiner
+from .types_helper import get_mime_type, get_method, check_extension as check_extension_helper
+from .results import get_error_result, get_msg_result
+from . import examiner
 
 
 def check_extension(filename, mimetype):
@@ -15,7 +15,7 @@ def check_extension(filename, mimetype):
     return check_extension_helper(filename, mimetype)
 
 
-def analyse_file(file_object, check_file_extension=False):
+def analyse_file(file_object, check_file_extension=True):
     """Untersucht ein Dateiobjekt auf bösartigen Inhalt
     :param file_object: Das Dateiobjekt (z.B. erzeugt mit open())
     :param check_file_extension: (bool) True, falls die Dateiendung auf Gültigkeit überprüft werden soll
@@ -60,62 +60,77 @@ def analyse_file(file_object, check_file_extension=False):
     return examine_result
 
 
-def analyse_file_list(file_object_list, check_file_extension=False, prints=False):
+def analyse_file_list(file_object_list, check_file_extension=True, prints=False, merge_results=True):
     """Untersucht ein Liste von Dateiobjekten auf bösartigen Inhalt
     :param file_object_list: List von Dateiobjekten (z.B. erzeugt mit open())
     :param check_file_extension: (bool) True, falls die Dateiendungen auf Gültigkeit überprüft werden sollen
     :param prints: (bool) True, falls der Fortschritt und Meldungen in der Konsole ausgegeben werden sollen
+    :param merge_results: (bool) True, falls die Ergebnisse nach Risiko und Meldung gruppiert werden sollen
     """
 
-    successful = [{'risk': 0, 'count': 0, 'results': []}, {'risk': 1, 'count': 0, 'results': []}, {'risk': 2, 'count': 0, 'results': []}, {'risk': 3, 'count': 0, 'results': []}]
-    not_successful = []
-    i = 0
-    for file_object in file_object_list:
-        i += 1
-        if prints: print(f'Analysiere Datei {i}: {file_object.name}')
-        result = analyse_file(file_object, check_file_extension)
-        if prints: print(f'Analyse von Datei {i} fertig: {result}')
+    if merge_results:
+        successful = [{'risk': 0, 'count': 0, 'results': []}, {'risk': 1, 'count': 0, 'results': []}, {'risk': 2, 'count': 0, 'results': []}, {'risk': 3, 'count': 0, 'results': []}]
+        not_successful = []
+        i = 0
+        for file_object in file_object_list:
+            i += 1
+            if prints: print(f'Analysiere Datei {i}: {file_object.name}')
+            result = analyse_file(file_object, check_file_extension)
+            if prints: print(f'Analyse von Datei {i} fertig: {result}')
 
-        success = result['success']
-        risk = result['risk']
-        mimetype = result['mimetype']
-        result_id = result['result']
-        message = result['message']
+            success = result['success']
+            risk = result['risk']
+            mimetype = result['mimetype']
+            result_id = result['result']
+            message = result['message']
 
-        if not success:
-            item_found = False
-            for not_success_item in not_successful:
-                if not_success_item['result'] == result_id:
-                    item_found = True
-                    not_success_item['files'].append({'path': file_object.name, 'mimetype': mimetype})
-                    not_success_item['count'] += 1
-                    break
-            if not item_found:
-                not_successful.append({'result': result_id, 'message': message, 'count': 1, 'files': [{'path': file_object.name, 'mimetype': mimetype}]})
-        else:
-            item_found = False
-            risk_dict = successful[risk]
-            result_list = risk_dict['results']
-            risk_dict['count'] += 1
-            for success_item in result_list:
-                if success_item['result'] == result_id:
-                    item_found = True
-                    success_item['files'].append({'path': file_object.name, 'mimetype': mimetype})
-                    success_item['count'] += 1
-                    break
-            if not item_found:
-                result_list.append({'result': result_id, 'message': message, 'count': 1,
-                                    'files': [{'path': file_object.name, 'mimetype': mimetype}]})
+            if not success:
+                item_found = False
+                for not_success_item in not_successful:
+                    if not_success_item['result'] == result_id:
+                        item_found = True
+                        not_success_item['files'].append({'path': file_object.name, 'mimetype': mimetype})
+                        not_success_item['count'] += 1
+                        break
+                if not item_found:
+                    not_successful.append({'result': result_id, 'message': message, 'count': 1, 'files': [{'path': file_object.name, 'mimetype': mimetype}]})
+            else:
+                item_found = False
+                risk_dict = successful[risk]
+                result_list = risk_dict['results']
+                risk_dict['count'] += 1
+                for success_item in result_list:
+                    if success_item['result'] == result_id:
+                        item_found = True
+                        success_item['files'].append({'path': file_object.name, 'mimetype': mimetype})
+                        success_item['count'] += 1
+                        break
+                if not item_found:
+                    result_list.append({'result': result_id, 'message': message, 'count': 1,
+                                        'files': [{'path': file_object.name, 'mimetype': mimetype}]})
 
-    return {'successful': successful, 'not_successful': not_successful}
+        return {'successful': successful, 'not_successful': not_successful}
+
+    else:
+        results = []
+        i = 0
+        for file_object in file_object_list:
+            i += 1
+            if prints: print(f'Analysiere Datei {i}: {file_object.name}')
+            result = analyse_file(file_object, check_file_extension)
+            result['path'] = file_object.name
+            results.append(result)
+            if prints: print(f'Analyse von Datei {i} fertig: {result}')
+        return results
 
 
-def analyse_directory(absolute_path, recursive=False, check_file_extension=False, prints=False):
+def analyse_directory(absolute_path, recursive=True, check_file_extension=True, prints=False, merge_results=True):
     """Untersucht alle Dateien in einem Verzeichnis auf bösartigen Inhalt
     :param absolute_path: (str) Absoluter Pfad des Ordners
     :param recursive: (bool) Rekursiv in Unterverzeichnisse absteigen
     :param check_file_extension: (bool) True, falls die Dateiendungen auf Gültigkeit überprüft werden sollen
     :param prints: (bool) True, falls der Fortschritt und Meldungen in der Konsole ausgegeben werden sollen
+    :param merge_results: (bool) True, falls die Ergebnisse nach Risiko und Meldung gruppiert werden sollen
     """
     if recursive:
         paths = [os.path.join(root, file) for root, _, files in os.walk(absolute_path) for file in files]
@@ -123,57 +138,11 @@ def analyse_directory(absolute_path, recursive=False, check_file_extension=False
         paths = [os.path.join(absolute_path, file) for file in os.listdir(absolute_path)]
 
     objects = [open(path, 'rb') for path in paths if os.path.isfile(path)]
-    return analyse_file_list(objects, check_file_extension, prints)
-
+    return analyse_file_list(objects, check_file_extension, prints, merge_results)
 
 
 if __name__ == '__main__':
     # Example usage
-    folder = 'test_good_all_mac'
+    folder = 'test_malicious_files'
     path = os.path.join(os.path.dirname(os.path.abspath(__file__)), folder)
-    print(analyse_directory(path, recursive=True, check_file_extension=True, prints=True))
-
-    """
-    #TEST_FOLDER = 'test_non_malicious'
-    TEST_FOLDER = 'test_good_all_mac'
-    #TEST_FOLDER = 'test_office'
-    BASE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), TEST_FOLDER)
-
-    print(analyse_directory(BASE_PATH, True, True, True))
-    """
-
-    """
-    test_file_names = [f for f in os.listdir(BASE_PATH)]
-    test_file_paths = [os.path.join(BASE_PATH, test_file) for test_file in test_file_names]
-    test_file_objects = [open(test_file_path, 'rb') for test_file_path in test_file_paths]
-
-    print(analyse_file_list(test_file_objects, True, True))
-    """
-    """
-    results = {}
-    errors = []
-    i = 1
-    for test_file_object in test_file_objects:
-        try:
-            print(f'Analysing file {i}: {test_file_object.name}')
-            #print({'file': test_file_object.name})
-            result = analyse_file(test_file_object)
-            print(f'Analysing finished: {result}')
-            reason = result['reason']
-            if results.get(reason) is None:
-                result['files'] = []
-                result['count'] = 0
-                results[reason] = result
-            results[reason]['files'].append(test_file_object.name)
-            results[reason]['count'] += 1
-        except Exception as e:
-            print({'error': e})
-            errors.append((e, test_file_object.name))
-        finally:
-            i += 1
-
-    print('\nERRORS:\n')
-    print(errors)
-    print('\nRESULTS:\n')
-    print(results)
-    """
+    print(analyse_directory(path, recursive=True, check_file_extension=True, prints=True, merge_results=False))

@@ -3,8 +3,8 @@ import os
 import json
 import subprocess
 
-from didier_stevens import pdfid
-from results import get_error_result, get_msg_result
+from .didier_stevens import pdfid
+from .results import get_error_result, get_msg_result
 
 #import binwalk
 
