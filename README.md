@@ -21,6 +21,10 @@ sudo apt-get install libmagic-dev
 Installation mit pip:  
   
 ```  
+mkdir my-project
+cd my-project
+python3 -m venv .venv
+. .venv/bin/activate
 pip install edi.filetriage@git+https://github.com/educorvi/edi.filetriage.git  
 ```  
   
