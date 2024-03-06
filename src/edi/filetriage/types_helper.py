@@ -66,5 +66,5 @@ def check_extension(filename, mimetype):
     actual_extension = filename.split('.')[-1]
     if actual_extension not in extension_list:
         return {'valid': False, 'message': 'Die Dateiendung stimmt nicht mit dem Mimetype überein'}
-    return {'valid': True, 'message': None}
+    return {'valid': True, 'message': 'Die Dateiendung stimmt mit dem Mimetype überein'}
 
