@@ -5,8 +5,8 @@ setup(
     version='0.1',
     packages=find_packages(),
     install_requires=[
-        'python-magic = 0.4.27',
-        'olefile = 0.47',
+        'python-magic >= 0.4.27',
+        'olefile >= 0.47',
     ],
     # Metadata
     author='Jonas Hüttinger',
