@@ -69,17 +69,26 @@ def analyse_file_list(file_object_list, check_file_extension=True, prints=False,
     :param use_paths: (bool) True, falls statt File-Objekten Pfade übergeben werden sollen
     """
 
+    list_len = len(file_object_list)
+    if prints:
+        print(f'Starte Analyse von {list_len} Dateien')
+        print(f'Dateipfade: {file_object_list}\n')
+
     if merge_results:
         successful = [{'risk': 0, 'count': 0, 'results': []}, {'risk': 1, 'count': 0, 'results': []}, {'risk': 2, 'count': 0, 'results': []}, {'risk': 3, 'count': 0, 'results': []}]
         not_successful = []
         i = 0
         for file_object in file_object_list:
+            if i % 100 == 0 and i != 0 and prints:
+                print(f'\nZwischenergebnis: {i} von {list_len} Dateien analysiert')
+                print(f'successful: {successful}')
+                print(f'not_successful: {not_successful}\n')
             i += 1
             if use_paths:
                 file_object = open(file_object, 'rb')
-            if prints: print(f'Analysiere Datei {i}: {file_object.name}')
+            if prints: print(f'Analysiere Datei {i} von {list_len}: {file_object.name}')
             result = analyse_file(file_object, check_file_extension)
-            if prints: print(f'Analyse von Datei {i} fertig: {result}')
+            if prints: print(f'Analyse von Datei {i} fertig, Ergebnis: {result}')
 
             success = result['success']
             risk = result['risk']
@@ -118,10 +127,13 @@ def analyse_file_list(file_object_list, check_file_extension=True, prints=False,
         results = []
         i = 0
         for file_object in file_object_list:
+            if i % 100 == 0 and i != 0 and prints:
+                print(f'\nZwischenergebnis: {i} von {list_len} Dateien analysiert')
+                print(f'results: {results}\n')
             i += 1
             if use_paths:
                 file_object = open(file_object, 'rb')
-            if prints: print(f'Analysiere Datei {i}: {file_object.name}')
+            if prints: print(f'Analysiere Datei {i} von {list_len}: {file_object.name}')
             result = analyse_file(file_object, check_file_extension)
             result['path'] = file_object.name
             results.append(result)
@@ -146,6 +158,6 @@ def analyse_directory(absolute_path, recursive=True, check_file_extension=True, 
 
 if __name__ == '__main__':
     # Example usage
-    folder = 'test_malicious_files'
+    folder = 'test_frank'
     path = os.path.join(os.path.dirname(os.path.abspath(__file__)), folder)
-    print(analyse_directory(path, recursive=True, check_file_extension=True, prints=True, merge_results=False))
+    print(analyse_directory(path, recursive=True, check_file_extension=True, prints=True, merge_results=True))
